@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {searchTerms,recallPrompt,validateRecallInput,parseReminders,recallSaved,type RecallMemory} from '../lib/recall';
+const memory:RecallMemory={id:'one',original_text:'Apply to Amazon and EA',source_urls:['https://example.com/jobs/1'],image_path:null,updated_at:'2026-11-07T20:00:00Z',ai_status:'pending',ai_data:null};
+test('job questions expand into saved posting and company terms',()=>{const terms=searchTerms('Which jobs was I applying for?');assert.ok(terms.includes('posting'));assert.ok(terms.includes('company'));assert.ok(!terms.includes('which'));});
+test('search terms are safe and bounded for full text query',()=>{assert.ok(searchTerms('hello | !world:* <script>').every(s=>/^[a-z0-9]+$/.test(s)));assert.ok(searchTerms('a '.repeat(1000)).length<=24);});
+test('recall rejects oversized query and unknown status',()=>{assert.throws(()=>validateRecallInput({query:'x'.repeat(501)}));assert.throws(()=>validateRecallInput({status:'all'}));assert.deepEqual(validateRecallInput({}),{query:'',status:'active'});});
+test('recall rejects invented IDs, duplicates and generated URLs',()=>{for(const reminders of [[{id:'foreign',text:'Apply'}],[{id:'one',text:'Apply'},{id:'one',text:'Again'}],[{id:'one',text:'Visit https://invented.com'}]])assert.throws(()=>parseReminders({reminders},[memory],3));});
+test('recall validates references against only the supplied candidate set',()=>{assert.deepEqual(parseReminders({reminders:[{id:'one',text:'You planned to apply to Amazon and EA.'}]},[memory],3),[{id:'one',text:'You planned to apply to Amazon and EA.'}]);});
+test('no matches never calls Gemini and returns recent originals',async()=>{let called=false;const result=await recallSaved('unicorn',[],[memory],async()=>{called=true;});assert.equal(called,false);assert.equal(result.kind,'no_matches');assert.deepEqual(result.memories,[memory]);});
+test('AI outage keeps all matched originals and source URLs for retry',async()=>{const result=await recallSaved('jobs',[memory],[],async()=>{throw Error('timeout');});assert.equal(result.kind,'fallback');assert.deepEqual(result.memories,[memory]);assert.equal(result.memories[0].source_urls[0],memory.source_urls[0]);});
+test('generic recall cannot send more than three memories to Gemini',async()=>{const many=Array.from({length:9},(_,i)=>({...memory,id:String(i)}));const result=await recallSaved('',many,[],async candidates=>{assert.equal(candidates.length,3);return {reminders:[{id:'0',text:'Apply'}]};});assert.equal(result.memories.length,3);});
+test('natural generic reminder question returns recent memories',()=>{assert.equal(validateRecallInput({query:'What was I working on?'}).query,'');});
+test('search expansion never inserts example company names',()=>{assert.ok(!searchTerms('jobs').includes('amazon'));assert.ok(!searchTerms('jobs').includes('ea'));});
+
+test("recall tells Gemini exactly which records contain screenshots",()=>{const prompt=recallPrompt("",[memory,{...memory,id:"image",image_path:"private.png"}]);assert.match(prompt,/"has_image":false/);assert.match(prompt,/"has_image":true/);});
