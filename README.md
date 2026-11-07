@@ -15,12 +15,20 @@ The app is live at [breadcrumb-alpha.vercel.app](https://breadcrumb-alpha.vercel
 - Gemini organization of saved notes and screenshots, with originals preserved and retry if processing fails.
 - **Remind me** for recent memories or questions about saved context, with exact saved source links.
 - AI help is optional and enabled separately for each account in the browser.
+- Edit original notes, mark memories done/reopen, and confirm deletion with retryable screenshot cleanup.
+- Desktop extension source pre-fills the current page title and URL into the normal save flow.
 
 To try it: sign in, choose **Enable AI help**, save a note or screenshot, then use **Remind me**. Existing unorganized notes have an **Organize memory** action.
 
-52 focused tests pass, along with type, lint and build checks. Browser checks cover real Gemini text/image organization, co-op/coding recall, source links, account switching and a 390px phone layout. Separate physical-phone testing and a real provider-outage recovery test remain unrun; failure and retry behavior has deterministic test coverage.
+82 focused tests pass, along with type, lint and build checks. Browser checks cover real Gemini text/image organization, co-op/coding recall, source links, account switching and a 390px phone layout. Separate physical-phone testing and a real provider-outage recovery test remain unrun; failure and retry behavior has deterministic test coverage.
 
-Editing, marking memories done, deletion and the minimal desktop extension are the next stage. Search uses database text matching with small query expansions; it is not unrestricted semantic search or a general chatbot. Closing a tab can interrupt AI processing; the saved original remains available for retry.
+Stage4 code is implemented and deployed, but interactive edit/done/reopen/delete/import checks and an actual installed-Chrome extension test are still pending because browser access was blocked. Automated worker tests do not establish installed-extension success.
+
+Unfinished deletion cleanup can be retried from the same browser; recovery tickets are stored separately for each account and memory.
+
+Install the extension using [these instructions](extension/README.md). It is a load-unpacked hackathon build, not a Chrome Web Store listing.
+
+ Search uses database text matching with small query expansions; it is not unrestricted semantic search or a general chatbot. Closing a tab can interrupt AI processing; the saved original remains available for retry.
 
 Built with Next.js, TypeScript, Tailwind CSS, Supabase and Google Gemini.
 
