@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {parseCaptureImport,importDecision} from '../lib/capture-import';
+const id='11111111-1111-4111-8111-111111111111';
+const hash=(data:unknown)=>'#breadcrumb='+encodeURIComponent(JSON.stringify(data));
+const payload={version:1,id,title:'EA Careers',url:'https://www.ea.com/careers?a=1&b=2#role'};
+test('extension import preserves exact title and source including punctuation',()=>{const result=parseCaptureImport(hash(payload));assert.equal(result?.note,'EA Careers\nhttps://www.ea.com/careers?a=1&b=2#role');});
+test('import rejects unsafe, oversized or malformed payloads',()=>{for(const data of [{...payload,url:'javascript:alert(1)'},{...payload,title:'x'.repeat(301)},{...payload,id:'bad'},{...payload,version:2}])assert.throws(()=>parseCaptureImport(hash(data)));assert.equal(parseCaptureImport('#memory-one'),null);});
+test('existing text or image is preserved until import is explicitly accepted',()=>{const imported=parseCaptureImport(hash(payload))!;assert.equal(importDecision(imported,'My unfinished thought',false,[]),'pending');assert.equal(importDecision(imported,'',true,[]),'pending');assert.equal(importDecision(imported,'',false,[]),'apply');});
+test('already imported payload is not duplicated after reload or login',()=>{const imported=parseCaptureImport(hash(payload))!;assert.equal(importDecision(imported,'',false,[id]),'duplicate');});
+test('pending page can be restored after sign-in without replacing the existing note',async()=>{const {restorePendingImport}=await import('../lib/capture-import');const imported=parseCaptureImport(hash(payload))!;assert.deepEqual(restorePendingImport(JSON.stringify(imported)),imported);assert.equal(restorePendingImport('bad'),null);});

@@ -1,0 +1,8 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {runInNewContext} from 'node:vm';
+function worker(){let clicked:(tab:unknown)=>Promise<void>=async()=>{};const opened:string[]=[];const chrome={action:{onClicked:{addListener:(fn:typeof clicked)=>{clicked=fn;}},setBadgeText:async()=>{},setTitle:async()=>{}},tabs:{create:async({url}:{url:string})=>{opened.push(url);}}};runInNewContext(readFileSync('extension/background.js','utf8'),{chrome,URL,encodeURIComponent,crypto:{randomUUID:()=> '11111111-1111-4111-8111-111111111111'}});return {opened,click:(tab:unknown)=>clicked(tab)};}
+test('toolbar click opens fixed app with title and URL only in the client fragment',async()=>{const app=worker();await app.click({id:1,title:'EA Careers',url:'https://www.ea.com/careers'});const url=new URL(app.opened[0]);assert.equal(url.origin,'https://breadcrumb-alpha.vercel.app');assert.equal(url.search,'');const data=JSON.parse(new URLSearchParams(url.hash.slice(1)).get('breadcrumb')!);assert.equal(data.title,'EA Careers');assert.equal(data.url,'https://www.ea.com/careers');});
+test('extension refuses restricted and unsupported pages',async()=>{const app=worker();for(const url of ['chrome://settings','file:///tmp/a','data:text/html,a'])await app.click({id:1,title:'Private',url});assert.equal(app.opened.length,0);});
+test('manifest grants active tab only and has no content scripts or broad hosts',()=>{const manifest=JSON.parse(readFileSync('extension/manifest.json','utf8'));assert.deepEqual(manifest.permissions,['activeTab']);assert.equal(manifest.host_permissions,undefined);assert.equal(manifest.content_scripts,undefined);assert.equal(manifest.manifest_version,3);});
