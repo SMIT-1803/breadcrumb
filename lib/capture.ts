@@ -1,5 +1,5 @@
-export function validateCapture(text: unknown) {
- if(typeof text !== 'string' || !text.trim()) throw new Error('Write a note before saving.');
+export function validateCapture(text: unknown, hasImage = false) {
+ if(typeof text !== 'string' || (!text.trim() && !hasImage)) throw new Error('Write a note before saving.');
  if(text.length>4000) throw new Error('Keep your note under 4,000 characters.');
  if(/\b(?:javascript|data|file|vbscript):/i.test(text)) throw new Error('Use only http:// or https:// links.');
  const source_urls=[...new Set((text.match(/https?:\/\/[^\s<>]+/gi)||[]).map(url=>{while(url.endsWith(')')&&(url.match(/\)/g)||[]).length>(url.match(/\(/g)||[]).length)url=url.slice(0,-1);return url;}))];

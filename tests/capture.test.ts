@@ -6,3 +6,4 @@ test('preserves original text and exact HTTP sources',()=>{const text='Apply to 
 test('rejects unsafe protocols and too many links',()=>{assert.throws(()=>validateCapture('javascript:alert(1)'));assert.throws(()=>validateCapture(Array.from({length:6},(_,i)=>`https://example.com/${i}`).join(' ')));});
 
 test('preserves balanced parentheses and source query punctuation',()=>{const url='https://en.wikipedia.org/wiki/Function_(mathematics)';assert.equal(validateCapture(url).source_urls[0],url);const query='https://example.com/search?q=hello!';assert.equal(validateCapture(query).source_urls[0],query);});
+test('allows screenshot-only capture but rejects fully empty input',()=>{assert.deepEqual(validateCapture('',true),{original_text:'',source_urls:[]});assert.throws(()=>validateCapture('',false));});
