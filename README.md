@@ -20,9 +20,9 @@ The app is live at [breadcrumb-alpha.vercel.app](https://breadcrumb-alpha.vercel
 
 To try it: sign in, choose **Enable AI help**, save a note or screenshot, then use **Remind me**. Existing unorganized notes have an **Organize memory** action.
 
-82 focused tests pass, along with type, lint and build checks. Browser checks cover real Gemini text/image organization, co-op/coding recall, source links, account switching and a 390px phone layout. Separate physical-phone testing and a real provider-outage recovery test remain unrun; failure and retry behavior has deterministic test coverage.
+85 focused tests pass, along with type, lint and build checks. Browser checks cover real Gemini text/image organization, co-op/coding recall, source links, account switching and a 390px phone layout. Separate physical-phone testing and a real provider-outage recovery test remain unrun; failure and retry behavior has deterministic test coverage.
 
-Stage4 code is implemented and deployed, but interactive edit/done/reopen/delete/import checks and an actual installed-Chrome extension test are still pending because browser access was blocked. Automated worker tests do not establish installed-extension success.
+Stage4 code is implemented and deployed. User testing confirms done/reopen, deletion, installed extension handoff and phone/laptop access. User testing found duplicate organization UI after save/edit; a React DOM regression reproduces it and the fix passes. Agent browser verification remains blocked, and the latest save/edit fix still needs user retesting.
 
 Unfinished deletion cleanup can be retried from the same browser; recovery tickets are stored separately for each account and memory.
 
