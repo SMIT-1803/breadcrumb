@@ -8,15 +8,21 @@ Built for SFU Fall Hacks 2026 — **DIGITAL SIDEKICK**.
 
 ## Current status
 
-Stage 1 is working at https://breadcrumb-alpha.vercel.app. Google sign-in, private text/link saving, draft preservation through sign-in, and saved-note retrieval have been checked locally and on the deployment.
+The app is live at [breadcrumb-alpha.vercel.app](https://breadcrumb-alpha.vercel.app).
 
-Stage 2 adds private screenshot upload, preview, screenshot-only capture, reload recovery and saved-original viewing. The app checks file type/size and retains the draft if saving fails.
+- Google sign-in and private notes, links and screenshots.
+- Screenshot preview, reload recovery and original-image viewing.
+- Gemini organization of saved notes and screenshots, with originals preserved and retry if processing fails.
+- **Remind me** for recent memories or questions about saved context, with exact saved source links.
+- AI help is optional and enabled separately for each account in the browser.
 
-Twenty focused tests pass. Local browser checks cover upload, original viewing, signed-out denial and a second account being unable to open the first account’s screenshot. Separate-phone testing and clipboard-image paste remain to be checked. Gemini reminders, memory controls and the extension are upcoming stages.
+To try it: sign in, choose **Enable AI help**, save a note or screenshot, then use **Remind me**. Existing unorganized notes have an **Organize memory** action.
 
-Planned stack: Next.js, TypeScript, Tailwind CSS, Supabase and Google Gemini.
+52 focused tests pass, along with type, lint and build checks. Browser checks cover real Gemini text/image organization, co-op/coding recall, source links, account switching and a 390px phone layout. Separate physical-phone testing and a real provider-outage recovery test remain unrun; failure and retry behavior has deterministic test coverage.
 
-The planned web app includes private Google sign-in, text/screenshot/link capture, grounded AI reminders and basic memory management. A minimal desktop extension will pass the current page title and URL into the same web capture flow.
+Editing, marking memories done, deletion and the minimal desktop extension are the next stage. Search uses database text matching with small query expansions; it is not unrestricted semantic search or a general chatbot. Closing a tab can interrupt AI processing; the saved original remains available for retry.
+
+Built with Next.js, TypeScript, Tailwind CSS, Supabase and Google Gemini.
 
 ## Configuration
 
