@@ -16,7 +16,7 @@ The planned web app includes private Google sign-in, text/screenshot/link captur
 
 ## Configuration
 
-Copy `.env.example` to `.env.local` and supply your own provider values locally. Never commit credential files. Application install/run instructions will be added with the first working version.
+Copy `.env.example` to `.env.local` and supply your own provider values locally. Never commit credential files. Install with `npm install`, then run `npm run dev`. Use `npm test`, `npm run typecheck`, `npm run lint` and `npm run build` for checks. Node.js 24 is the development runtime.
 
 ## Database
 

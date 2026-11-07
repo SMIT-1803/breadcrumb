@@ -1,0 +1,14 @@
+.env*
+!.env.example
+.git/
+node_modules/
+.next/
+.superpowers/
+.codex/
+.agents/
+AGENTS.md
+HACKATHON.md
+progress.md
+findings.md
+task_plan.md
+docs/superpowers/
