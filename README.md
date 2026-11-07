@@ -20,9 +20,9 @@ The app is live at [breadcrumb-alpha.vercel.app](https://breadcrumb-alpha.vercel
 
 To try it: sign in, choose **Enable AI help**, save a note or screenshot, then use **Remind me**. Existing unorganized notes have an **Organize memory** action.
 
-85 focused tests pass, along with type, lint and build checks. Browser checks cover real Gemini text/image organization, co-op/coding recall, source links, account switching and a 390px phone layout. Separate physical-phone testing and a real provider-outage recovery test remain unrun; failure and retry behavior has deterministic test coverage.
+86 focused tests pass, along with type, lint and build checks. Browser checks cover real Gemini text/image organization, co-op/coding recall, source links, account switching and a 390px phone layout. Separate physical-phone testing and a real provider-outage recovery test remain unrun; failure and retry behavior has deterministic test coverage.
 
-Stage4 code is implemented and deployed. User testing confirms done/reopen, deletion, installed extension handoff and phone/laptop access. User testing found duplicate organization UI after save/edit; a React DOM regression reproduces it and the fix passes. Agent browser verification remains blocked, and the latest save/edit fix still needs user retesting.
+Stage4 code is implemented and deployed. User testing confirms done/reopen, deletion, installed extension handoff and phone/laptop access. User testing found duplicate organization UI after save/edit; a React DOM regression reproduces it and the fix passes. The user retested save/edit and confirmed the fix works. Agent browser verification remains blocked.
 
 Unfinished deletion cleanup can be retried from the same browser; recovery tickets are stored separately for each account and memory.
 
@@ -41,3 +41,7 @@ Copy `.env.example` to `.env.local` and supply your own provider values locally.
 Apply the SQL files in `supabase/migrations/` in filename order to a dedicated Supabase project. The rollback-only test in `supabase/tests/private_memories.sql` checks ownership isolation, validation and revision behavior. It uses synthetic accounts and must be run as the project database administrator.
 
 SQL storage metadata checks do not replace actual Storage API upload/download/delete testing.
+
+## Submission and demo
+
+See [SUBMISSION.md](SUBMISSION.md) for the project story, technology tags, demo walkthrough and remaining submission items.

@@ -16,4 +16,4 @@ The destination is https://breadcrumb-alpha.vercel.app. A `!` badge means the cu
 
 Only `activeTab` is requested. The extension reads the clicked page’s title and URL; it does not scrape content, capture screenshots, watch other tabs or hold service keys. Capture data travels in the client-only URL fragment, which the app removes after import. The user reviews and saves through the normal website account.
 
-An existing draft is preserved and the user chooses whether to append the page. This is a load-unpacked hackathon build, not a Chrome Web Store listing. Runtime installation and click verification are pending; automated worker and import tests do not prove an installed extension works.
+An existing draft is preserved and the user chooses whether to append the page. This is a load-unpacked hackathon build, not a Chrome Web Store listing. The user reports that installation and page-title/link capture work in their manual test. Agent-controlled installed-browser verification remains blocked; automated worker/import tests are separate evidence.
