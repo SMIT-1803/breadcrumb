@@ -53,7 +53,7 @@ This is a flexible outline; adjust it to the organizer's actual time limit.
 5. Briefly show a phone-saved idea appearing on the laptop after refresh, then mark a test memory done and reopen it.
 6. Close: “Breadcrumb is a digital sidekick that remembers enough context to help you get started again.”
 
-Before presenting: sign in, enable AI help, pin the extension, use only non-private samples, and verify the public app. If AI is unavailable, show saved originals and explain the limitation. Any backup recording must be identified as a recording.
+Before presenting: sign in, pin the extension, use only non-private samples, and verify the public app. If AI is unavailable, show saved originals and explain the limitation. Any backup recording must be identified as a recording.
 
 ## Remaining submission items
 

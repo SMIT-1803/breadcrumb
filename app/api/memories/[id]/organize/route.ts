@@ -1,3 +1,4 @@
+import {AiServiceError} from '@/lib/ai-error';
 import {NextResponse} from 'next/server';
 import {serverClient} from '@/lib/supabase/server';
 import {organizeMemory} from '@/lib/organize-memory';
@@ -17,5 +18,5 @@ export async function POST(request:Request,context:{params:Promise<{id:string}>}
  write:async(key,revision,patch,attempt)=>{let update=db.from('memories').update(patch).eq('id',key).eq('user_id',user.id).eq('revision',revision);update=attempt?update.eq('ai_status','processing').eq('ai_error',attempt):update.neq('ai_status','ready');const {data,error}=await update.select('id');if(error)throw Error('Could not update this memory. Try again.');return !!data?.length;}
  },generateOrganization);
  return NextResponse.json({organization},{headers:{'Cache-Control':'no-store'}});
- }catch(error){const missing=error instanceof Error&&error.message.includes('not found');return NextResponse.json({error:missing?'Memory not found in your notebook.':'Could not organize this memory. Your original is safe. Try again.'},{status:missing?404:503});}finally{release();}
+ }catch(error){const missing=error instanceof Error&&error.message.includes('not found');return NextResponse.json({error:missing?'Memory not found in your notebook.':error instanceof AiServiceError?error.message:'Could not organize this memory. Your original is safe. Try again.'},{status:missing?404:503});}finally{release();}
 }

@@ -1,7 +1,8 @@
+import {aiFailureMessage} from './ai-error';
 import {boundedText,parseOrganization} from './organization';
 export type RecallMemory={id:string;revision:number;original_text:string;source_urls:string[];image_path:string|null;updated_at:string;ai_status:string;ai_data:unknown};
 export type Reminder={id:string;text:string};
-export type RecallResult={kind:'ready'|'fallback'|'no_matches'|'empty';memories:RecallMemory[];reminders:Reminder[]};
+export type RecallResult={kind:'ready'|'fallback'|'no_matches'|'empty';memories:RecallMemory[];reminders:Reminder[];error?:string};
 export function validateRecallInput(input:unknown){
  if(!input||typeof input!=='object')throw Error('Invalid reminder request.');const value=input as Record<string,unknown>;
  let query=value.query===undefined?'':boundedText(value.query,500,true).trim();if(/^(?:what was i (?:doing|working on)|remind me|where was i|what should i (?:resume|do next))[?.!]*$/i.test(query))query='';const status=value.status===undefined?'active':value.status;
@@ -23,10 +24,13 @@ export function recallPrompt(query:string,memories:RecallMemory[]){
 export function parseReminders(value:unknown,memories:RecallMemory[],max:number):Reminder[]{
  if(!value||typeof value!=='object')throw Error('Invalid reminder.');const reminders=(value as Record<string,unknown>).reminders;
  if(!Array.isArray(reminders)||reminders.length>max)throw Error('Invalid reminders.');const allowed=new Set(memories.map(m=>m.id)),seen=new Set<string>();
- return reminders.map(value=>{if(!value||typeof value!=='object')throw Error('Invalid reminder.');const r=value as Record<string,unknown>;const id=boundedText(r.id,36),text=boundedText(r.text,1000);if(!allowed.has(id)||seen.has(id)||/(?:https?:\/\/|www\.)/i.test(text))throw Error('Unverified reminder source.');seen.add(id);return {id,text};});
+ return reminders.map(value=>{if(!value||typeof value!=='object')throw Error('Invalid reminder.');const r=value as Record<string,unknown>;const id=boundedText(r.id,36);let text=boundedText(r.text,1000);if(!allowed.has(id)||seen.has(id))throw Error('Unverified reminder source.');
+ const source=memories.find(m=>m.id===id)!;
+ text=text.replace(/(?:https?:\/\/|www\.)[^\s<>]+/gi,url=>{const normalized=/^www\./i.test(url)?'https://'+url:url;if(!source.source_urls.includes(normalized)&&!source.source_urls.includes(normalized.replace(/[.,;!?)]+$/,'')))throw Error('Unverified reminder source.');return '';}).replace(/ +/g,' ').trim();
+ if(!text)throw Error('Empty reminder.');seen.add(id);return {id,text};});
 }
 export async function recallSaved(query:string,matches:RecallMemory[],recent:RecallMemory[],generate:(candidates:RecallMemory[])=>Promise<unknown>):Promise<RecallResult>{
  const memories=matches.slice(0,query?10:3);
  if(!memories.length)return {kind:query?'no_matches':'empty',memories:recent.slice(0,3),reminders:[]};
- try{const reminders=parseReminders(await generate(memories),memories,query?10:3);if(!reminders.length)return {kind:'no_matches',memories:recent.slice(0,3),reminders:[]};return {kind:'ready',memories:query?memories.filter(m=>reminders.some(r=>r.id===m.id)):memories,reminders};}catch{return {kind:'fallback',memories,reminders:[]};}
+ try{const reminders=parseReminders(await generate(memories),memories,query?10:3);if(!reminders.length)return {kind:'no_matches',memories:recent.slice(0,3),reminders:[]};return {kind:'ready',memories:query?memories.filter(m=>reminders.some(r=>r.id===m.id)):memories,reminders};}catch(error){return {kind:'fallback',memories,reminders:[],error:aiFailureMessage(error)};}
 }

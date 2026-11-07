@@ -14,13 +14,13 @@ The app is live at [breadcrumb-alpha.vercel.app](https://breadcrumb-alpha.vercel
 - Screenshot preview, reload recovery and original-image viewing.
 - Gemini organization of saved notes and screenshots, with originals preserved and retry if processing fails.
 - **Remind me** for recent memories or questions about saved context, with exact saved source links.
-- AI help is optional and enabled separately for each account in the browser.
+- AI organization runs automatically after saving; the app explains that note/image contents are processed by Gemini.
 - Edit original notes, mark memories done/reopen, and confirm deletion with retryable screenshot cleanup.
 - Desktop extension source pre-fills the current page title and URL into the normal save flow.
 
-To try it: sign in, choose **Enable AI help**, save a note or screenshot, then use **Remind me**. Existing unorganized notes have an **Organize memory** action.
+To try it: sign in, save a note or screenshot, then use **Remind me**. Existing unorganized notes have an **Organize memory** action.
 
-87 focused tests pass, along with type, lint and build checks. Browser checks cover real Gemini text/image organization, co-op/coding recall, source links, account switching and a 390px phone layout. Separate physical-phone testing and a real provider-outage recovery test remain unrun; failure and retry behavior has deterministic test coverage.
+89 focused tests pass, along with type, lint and build checks. Browser checks cover real Gemini text/image organization, co-op/coding recall, source links, account switching and a 390px phone layout. Separate physical-phone testing and a real provider-outage recovery test remain unrun; failure and retry behavior has deterministic test coverage.
 
 Stage4 code is implemented and deployed. User testing confirms done/reopen, deletion, installed extension handoff and phone/laptop access. User testing found duplicate organization UI after save/edit; a React DOM regression reproduces it and the fix passes. The user retested save/edit and confirmed the fix works. Agent browser verification remains blocked.
 
