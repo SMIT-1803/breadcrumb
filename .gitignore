@@ -1,0 +1,43 @@
+# Dependencies and build output
+node_modules/
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Provider credentials and local configuration
+.env*
+!.env.example
+*.pem
+*.key
+.vercel/
+.supabase/
+supabase/.temp/
+supabase/.branches/
+
+# Disposable tooling and machine files
+.superpowers/
+.codex/
+.agents/
+.worktrees/
+task_plan.md
+findings.md
+progress.md
+AGENTS.md
+HACKATHON.md
+docs/superpowers/
+.vscode/
+.idea/
+__pycache__/
+.venv/
+venv/
+.cache/
+.turbo/
+playwright-report/
+test-results/
+*.log
+.DS_Store
+*.swp
+*.swo
+*.orig
