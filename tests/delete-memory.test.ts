@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {deleteMemory,readDeleteTickets} from '../lib/delete-memory';
+const owner='owner',id='one',ticket={id,revision:2,image_path:'owner/one.png'};
+const memory={id,revision:2,image_path:ticket.image_path};
+test('deletion confirms row removal before deleting its image',async()=>{const calls:string[]=[];const result=await deleteMemory(ticket,owner,{read:async()=>memory,removeRow:async()=>{calls.push('row');return true;},removeImage:async path=>{calls.push(path);}});assert.equal(result.complete,true);assert.deepEqual(calls,['row',ticket.image_path]);});
+test('uncertain database deletion never removes the image',async()=>{let removed=false;await assert.rejects(()=>deleteMemory(ticket,owner,{read:async()=>memory,removeRow:async()=>{throw Error('network');},removeImage:async()=>{removed=true;}}));assert.equal(removed,false);});
+test('failed cleanup is explicitly retryable after row deletion',async()=>{const result=await deleteMemory(ticket,owner,{read:async()=>memory,removeRow:async()=>true,removeImage:async()=>{throw Error('outage');}});assert.equal(result.complete,false);});
+test('retry cleans an owned screenshot even after its row is gone',async()=>{let path='';const result=await deleteMemory(ticket,owner,{read:async()=>null,removeRow:async()=>{throw Error('must not run');},removeImage:async value=>{path=value;}});assert.equal(result.complete,true);assert.equal(path,ticket.image_path);});
+test('foreign paths and stale content cannot delete a memory',async()=>{for(const input of [{...ticket,image_path:'other/one.png'},{...ticket,revision:1}]){let removed=false;await assert.rejects(()=>deleteMemory(input,owner,{read:async()=>memory,removeRow:async()=>{removed=true;return true;},removeImage:async()=>{removed=true;}}));assert.equal(removed,false);}});
+test('row deletion race stops screenshot cleanup',async()=>{let removed=false;await assert.rejects(()=>deleteMemory(ticket,owner,{read:async()=>memory,removeRow:async()=>false,removeImage:async()=>{removed=true;}}),/changed/i);assert.equal(removed,false);});
+test('pending deletion recovery rejects malformed and foreign tickets',()=>{assert.deepEqual(readDeleteTickets('bad',owner),[]);assert.deepEqual(readDeleteTickets(JSON.stringify([ticket,{...ticket,image_path:'foreign/one.png'}]),owner),[ticket]);});

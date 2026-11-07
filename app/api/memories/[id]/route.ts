@@ -1,3 +1,4 @@
+import {deleteMemory} from '@/lib/delete-memory';
 import {NextResponse} from 'next/server';
 import {serverClient} from '@/lib/supabase/server';
 import {changeMemoryStatus} from '@/lib/memory-status';
@@ -14,4 +15,17 @@ export async function PATCH(request:Request,context:{params:Promise<{id:string}>
  update:async(revision,patch)=>{const {data,error}=await db.from('memories').update(patch).eq('id',id).eq('user_id',user.id).eq('revision',revision).select().maybeSingle();if(error)throw error;return data;}
  });return NextResponse.json({memory},{headers:{'Cache-Control':'no-store'}});
  }catch(error){return NextResponse.json({error:error instanceof MemoryActionError?error.message:'Your edit was not confirmed. Keep your changes and try again.'},{status:error instanceof MemoryActionError?error.status:503});}
+}
+
+export async function DELETE(request:Request,context:{params:Promise<{id:string}>}){
+ if(request.headers.get('origin')!==new URL(request.url).origin)return NextResponse.json({error:'Request origin rejected.'},{status:403});
+ const db=await serverClient();const {data:{user}}=await db.auth.getUser();if(!user)return NextResponse.json({error:'Sign in to delete a memory.'},{status:401});
+ const {id}=await context.params;if(!/^[\da-f-]{36}$/i.test(id))return NextResponse.json({error:'Invalid memory ID.'},{status:400});
+ let input;try{const raw=await request.text();if(raw.length>2000)throw Error();const body=JSON.parse(raw);if(!body||typeof body!=='object')throw Error();input={...body,id};}catch{return NextResponse.json({error:'Invalid deletion request.'},{status:400});}
+ try{const result=await deleteMemory(input,user.id,{
+ read:async()=>{const {data,error}=await db.from('memories').select('id,revision,image_path').eq('id',id).eq('user_id',user.id).maybeSingle();if(error)throw error;return data;},
+ removeRow:async revision=>{const {data,error}=await db.from('memories').delete().eq('id',id).eq('user_id',user.id).eq('revision',revision).select('id');if(error)throw error;return !!data?.length;},
+ removeImage:async path=>{const {error}=await db.storage.from('screenshots').remove([path]);if(error)throw error;}
+ });return NextResponse.json(result,{headers:{'Cache-Control':'no-store'}});
+ }catch(error){return NextResponse.json({error:error instanceof MemoryActionError?error.message:'Deletion was not confirmed. Retry deletion to finish safely.'},{status:error instanceof MemoryActionError?error.status:503});}
 }
