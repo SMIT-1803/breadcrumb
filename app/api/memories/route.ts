@@ -1,9 +1,10 @@
+import {notebookStatus} from '@/lib/memory-status';
 import {NextResponse} from 'next/server';
 import {serverClient} from '@/lib/supabase/server';
 import {validateCapture} from '@/lib/capture';
 import {cleanFailedUpload} from '@/lib/image-cleanup';
 import {validateImage,validateImagePath} from '@/lib/images';
-export async function GET(){const db=await serverClient();const {data:{user}}=await db.auth.getUser();if(!user)return NextResponse.json({error:'Sign in to see your notes.'},{status:401});const {data,error}=await db.from('memories').select('id,original_text,source_urls,image_path,created_at,updated_at,status,revision,ai_status,ai_data').order('updated_at',{ascending:false}).limit(50);return NextResponse.json(error?{error:'Your notes could not load. Try again.'}:{memories:data},{status:error?503:200,headers:{'Cache-Control':'no-store'}});}
+export async function GET(request:Request){let status;try{status=notebookStatus(new URL(request.url).searchParams.get('status'));}catch{return NextResponse.json({error:'Choose a valid notebook view.'},{status:400});}const db=await serverClient();const {data:{user}}=await db.auth.getUser();if(!user)return NextResponse.json({error:'Sign in to see your notes.'},{status:401});const {data,error}=await db.from('memories').select('id,original_text,source_urls,image_path,created_at,updated_at,status,revision,ai_status,ai_data').eq('status',status).order('updated_at',{ascending:false}).limit(50);return NextResponse.json(error?{error:'Your notes could not load. Try again.'}:{memories:data},{status:error?503:200,headers:{'Cache-Control':'no-store'}});}
 export async function POST(request:Request){
  if(request.headers.get('origin')!==new URL(request.url).origin)return NextResponse.json({error:'Request origin rejected.'},{status:403});
  const db=await serverClient();const {data:{user}}=await db.auth.getUser();if(!user)return NextResponse.json({error:'Sign in before saving.'},{status:401});

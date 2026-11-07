@@ -1,0 +1,9 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {changeMemoryStatus,notebookStatus} from '../lib/memory-status';
+const original={id:'one',revision:2,status:'active' as const,original_text:'Apply to EA',image_path:null,ai_data:{title:'Apply'}};
+test('complete and reopen change only status and preserve context',async()=>{for(const status of ['done','active']){const current={...original,status:status==='done'?'active':'done'};const updated=await changeMemoryStatus({status,revision:2},{read:async()=>current,update:async(revision,previous,patch)=>{assert.equal(revision,2);assert.equal(previous,current.status);assert.deepEqual(patch,{status});return {...current,...patch};}});assert.equal(updated.revision,2);assert.equal(updated.ai_data,original.ai_data);}});
+test('repeat completion is idempotent',async()=>{let changed=false;const result=await changeMemoryStatus({status:'active',revision:2},{read:async()=>original,update:async()=>{changed=true;return original;}});assert.equal(result,original);assert.equal(changed,false);});
+test('status change rejects stale revision and update races',async()=>{for(const revision of [1,2])await assert.rejects(()=>changeMemoryStatus({status:'done',revision},{read:async()=>original,update:async()=>null}),/changed/i);});
+test('invalid status and inaccessible memory are rejected',async()=>{const repo={read:async()=>null,update:async()=>original};await assert.rejects(()=>changeMemoryStatus({status:'deleted',revision:2},repo),/status/i);await assert.rejects(()=>changeMemoryStatus({status:'done',revision:2},repo),/not found/i);});
+test('notebook defaults to active and refuses unknown filters',()=>{assert.equal(notebookStatus(null),'active');assert.equal(notebookStatus('done'),'done');assert.throws(()=>notebookStatus('all'));});
