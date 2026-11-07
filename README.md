@@ -10,7 +10,9 @@ Built for SFU Fall Hacks 2026 — **DIGITAL SIDEKICK**.
 
 Stage 1 is working at https://breadcrumb-alpha.vercel.app. Google sign-in, private text/link saving, draft preservation through sign-in, and saved-note retrieval have been checked locally and on the deployment.
 
-Six focused tests, TypeScript checks, lint and the production build passed for this checkpoint. Separate-phone testing and login cancellation remain to be checked. Screenshots, Gemini reminders, memory controls and the extension are upcoming stages.
+Stage 2 adds private screenshot upload, preview, screenshot-only capture, reload recovery and saved-original viewing. The app checks file type/size and retains the draft if saving fails.
+
+Twenty focused tests pass. Local browser checks cover upload, original viewing, signed-out denial and a second account being unable to open the first account’s screenshot. Separate-phone testing and clipboard-image paste remain to be checked. Gemini reminders, memory controls and the extension are upcoming stages.
 
 Planned stack: Next.js, TypeScript, Tailwind CSS, Supabase and Google Gemini.
 
