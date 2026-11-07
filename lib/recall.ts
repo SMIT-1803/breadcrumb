@@ -1,5 +1,5 @@
 import {boundedText,parseOrganization} from './organization';
-export type RecallMemory={id:string;original_text:string;source_urls:string[];image_path:string|null;updated_at:string;ai_status:string;ai_data:unknown};
+export type RecallMemory={id:string;revision:number;original_text:string;source_urls:string[];image_path:string|null;updated_at:string;ai_status:string;ai_data:unknown};
 export type Reminder={id:string;text:string};
 export type RecallResult={kind:'ready'|'fallback'|'no_matches'|'empty';memories:RecallMemory[];reminders:Reminder[]};
 export function validateRecallInput(input:unknown){
@@ -28,5 +28,5 @@ export function parseReminders(value:unknown,memories:RecallMemory[],max:number)
 export async function recallSaved(query:string,matches:RecallMemory[],recent:RecallMemory[],generate:(candidates:RecallMemory[])=>Promise<unknown>):Promise<RecallResult>{
  const memories=matches.slice(0,query?10:3);
  if(!memories.length)return {kind:query?'no_matches':'empty',memories:recent.slice(0,3),reminders:[]};
- try{const reminders=parseReminders(await generate(memories),memories,query?10:3);return {kind:reminders.length?'ready':'no_matches',memories,reminders};}catch{return {kind:'fallback',memories,reminders:[]};}
+ try{const reminders=parseReminders(await generate(memories),memories,query?10:3);if(!reminders.length)return {kind:'no_matches',memories:recent.slice(0,3),reminders:[]};return {kind:'ready',memories:query?memories.filter(m=>reminders.some(r=>r.id===m.id)):memories,reminders};}catch{return {kind:'fallback',memories,reminders:[]};}
 }

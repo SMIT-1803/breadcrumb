@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {searchTerms,recallPrompt,validateRecallInput,parseReminders,recallSaved,type RecallMemory} from '../lib/recall';
-const memory:RecallMemory={id:'one',original_text:'Apply to Amazon and EA',source_urls:['https://example.com/jobs/1'],image_path:null,updated_at:'2026-11-07T20:00:00Z',ai_status:'pending',ai_data:null};
+const memory:RecallMemory={id:'one',revision:2,original_text:'Apply to Amazon and EA',source_urls:['https://example.com/jobs/1'],image_path:null,updated_at:'2026-11-07T20:00:00Z',ai_status:'pending',ai_data:null};
 test('job questions expand into saved posting and company terms',()=>{const terms=searchTerms('Which jobs was I applying for?');assert.ok(terms.includes('posting'));assert.ok(terms.includes('company'));assert.ok(!terms.includes('which'));});
 test('search terms are safe and bounded for full text query',()=>{assert.ok(searchTerms('hello | !world:* <script>').every(s=>/^[a-z0-9]+$/.test(s)));assert.ok(searchTerms('a '.repeat(1000)).length<=24);});
 test('recall rejects oversized query and unknown status',()=>{assert.throws(()=>validateRecallInput({query:'x'.repeat(501)}));assert.throws(()=>validateRecallInput({status:'all'}));assert.deepEqual(validateRecallInput({}),{query:'',status:'active'});});
@@ -14,3 +14,5 @@ test('natural generic reminder question returns recent memories',()=>{assert.equ
 test('search expansion never inserts example company names',()=>{assert.ok(!searchTerms('jobs').includes('amazon'));assert.ok(!searchTerms('jobs').includes('ea'));});
 
 test("recall tells Gemini exactly which records contain screenshots",()=>{const prompt=recallPrompt("",[memory,{...memory,id:"image",image_path:"private.png"}]);assert.match(prompt,/"has_image":false/);assert.match(prompt,/"has_image":true/);});
+test('specific recall returns only the records Gemini actually referenced',async()=>{const other={...memory,id:'other'};const result=await recallSaved('jobs',[memory,other],[],async()=>({reminders:[{id:'one',text:'Apply to EA'}]}));assert.deepEqual(result.memories,[memory]);});
+test('model no-match uses three recent memories rather than lexical candidates',async()=>{const old={...memory,id:'old'},recent={...memory,id:'recent'};const result=await recallSaved('specific',[old],[recent],async()=>({reminders:[]}));assert.equal(result.kind,'no_matches');assert.deepEqual(result.memories,[recent]);});

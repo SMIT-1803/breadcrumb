@@ -1,0 +1,2 @@
+export const aiConsentKey=(userId:string)=>'breadcrumb-ai-enabled:'+userId;
+export function isCurrentRecall(captured:{id:string;revision:number},current:{id:string;revision:number;status:string;user_id:string}|null|undefined,userId:string,status:string){return !!current&&captured.id===current.id&&captured.revision===current.revision&&current.user_id===userId&&current.status===status;}
