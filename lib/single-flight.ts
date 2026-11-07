@@ -1,2 +1,2 @@
-// Reuse an existing request for the same memory until it settles.
-export function singleFlight(){const pending=new Map<string,Promise<void>>();return (id:string,run:()=>Promise<void>)=>{const existing=pending.get(id);if(existing)return existing;const request=Promise.resolve().then(run).finally(()=>pending.delete(id));pending.set(id,request);return request;};}
+// Reuse the same revision; queue newer edits behind the current attempt.
+export function singleFlight(){const pending=new Map<string,{request:Promise<void>;revision:number|undefined}>();return (id:string,run:()=>Promise<void>,revision?:number)=>{const existing=pending.get(id);if(existing&&existing.revision===revision)return existing.request;const previous=existing?existing.request.catch(()=>{}):Promise.resolve();const request=previous.then(run).finally(()=>{if(pending.get(id)?.request===request)pending.delete(id);});pending.set(id,{request,revision});return request;};}
