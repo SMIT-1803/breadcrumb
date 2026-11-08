@@ -1,47 +1,30 @@
 # Breadcrumb
 
-A digital sidekick that helps you return to interrupted tasks and ideas.
+**A handoff to your future self.**
 
-Save a quick note, optional screenshot and source links. Return later to recover the context you need to resume.
+When you step away from a task, Breadcrumb helps you remember the details you need to pick it up again. Save a quick note, a link, or a screenshot. Later, ask what you were working on and get a short reminder with your original sources.
 
-Built for SFU Fall Hacks 2026 — **DIGITAL SIDEKICK**.
+**Try it:** [breadcrumb-alpha.vercel.app](https://breadcrumb-alpha.vercel.app)
 
-## Current status
+## How it works
 
-The app is live at [breadcrumb-alpha.vercel.app](https://breadcrumb-alpha.vercel.app).
+1. Save a thought or screenshot in the web app. On desktop, the [Chrome extension](extension/README.md) can bring the current page's title and link into the save form.
+2. Gemini organizes the saved context into a summary and possible next step. Your original note, screenshot, and links remain available.
+3. Ask **Where was I?** to find relevant memories. You can also edit, complete, reopen, or delete them.
 
-- Google sign-in and private notes, links and screenshots.
-- Screenshot preview, reload recovery and original-image viewing.
-- Gemini organization of saved notes and screenshots, with originals preserved and retry if processing fails.
-- **Remind me** for recent memories or questions about saved context, with exact saved source links.
-- AI organization runs automatically after saving; the app explains that note/image contents are processed by Gemini.
-- Edit original notes, mark memories done/reopen, and confirm deletion with retryable screenshot cleanup.
-- Desktop extension source pre-fills the current page title and URL into the normal save flow.
+Your notebook follows your Google account across phone and laptop. Notes and screenshots are private to that account. If Gemini is unavailable, your saved originals remain accessible.
 
-To try it: sign in, save a note or screenshot, then use **Remind me**. Existing unorganized notes have an **Organize memory** action.
+## Built with
 
-89 focused tests pass, along with type, lint and build checks. Browser checks cover real Gemini text/image organization, co-op/coding recall, source links, account switching and a 390px phone layout. Separate physical-phone testing and a real provider-outage recovery test remain unrun; failure and retry behavior has deterministic test coverage.
+Next.js, TypeScript, Tailwind CSS, Supabase, Google Gemini, Vercel, and the Chrome Extensions API. Built for SFU Fall Hacks 2026.
 
-Stage4 code is implemented and deployed. User testing confirms done/reopen, deletion, installed extension handoff and phone/laptop access. User testing found duplicate organization UI after save/edit; a React DOM regression reproduces it and the fix passes. The user retested save/edit and confirmed the fix works. Agent browser verification remains blocked.
+## Run locally
 
-Unfinished deletion cleanup can be retried from the same browser; recovery tickets are stored separately for each account and memory.
+Copy `.env.example` to `.env.local` and add your own Supabase and Gemini values. For a new Supabase project, apply the SQL files in `supabase/migrations/` in filename order and configure Google sign-in.
 
-Install the extension using [these instructions](extension/README.md). It is a load-unpacked hackathon build, not a Chrome Web Store listing.
+```bash
+npm install
+npm run dev
+```
 
- Search uses database text matching with small query expansions; it is not unrestricted semantic search or a general chatbot. Closing a tab can interrupt AI processing; the saved original remains available for retry.
-
-Built with Next.js, TypeScript, Tailwind CSS, Supabase and Google Gemini.
-
-## Configuration
-
-Copy `.env.example` to `.env.local` and supply your own provider values locally. Never commit credential files. Install with `npm install`, then run `npm run dev`. Use `npm test`, `npm run typecheck`, `npm run lint` and `npm run build` for checks. Node.js 24 is the development runtime.
-
-## Database
-
-Apply the SQL files in `supabase/migrations/` in filename order to a dedicated Supabase project. The rollback-only test in `supabase/tests/private_memories.sql` checks ownership isolation, validation and revision behavior. It uses synthetic accounts and must be run as the project database administrator.
-
-SQL storage metadata checks do not replace actual Storage API upload/download/delete testing.
-
-## Submission and demo
-
-See [SUBMISSION.md](SUBMISSION.md) for the project story, technology tags, demo walkthrough and remaining submission items.
+The extension is a load-unpacked Chrome build; see its [installation instructions](extension/README.md). See [SUBMISSION.md](SUBMISSION.md) for the project story and demo outline.
